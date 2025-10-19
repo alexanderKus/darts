@@ -99,7 +99,10 @@ function App() {
             <button className="px-3 py-1 border-1 border-yellow-200 text-yellow-200 rounded-full text-lg flex items-center justify-center" onClick={addPlayer}>+</button>
           </div>
         :
-          <div className="py-10 text-3xl underline">Add a player to start a game.</div>
+        <>
+          <button className="mt-10 px-3 py-1 border-1 border-yellow-200 text-yellow-200 rounded-full text-lg flex items-center justify-center" onClick={addPlayer}>+</button>
+          <div className="py-2 text-3xl underline">Add a player to start a game.</div>
+        </>
       }
 
       {players.length > 0 && (
