@@ -1,5 +1,5 @@
 import './App.css'
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Player from "./components/Player.jsx";
 import Modal from "./components/Modal.jsx";
 import {INIT_SCORE} from "./contants/gameContants.js";
@@ -12,11 +12,21 @@ function App() {
   const [isNewPlayerModalOpen, setIsNewPlayerModalOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const currentPlayerName = players.find(p => p.turn)?.name || '';
+  const newPlayerNameRef = useRef(null);
+  const scoreRef = useRef(null);
 
   useEffect(() => {
-    if (players.some(p => p.score === INIT_SCORE))
+    if (players.some(p => p.score === INIT_SCORE)){
       setIsModalOpen(true);
+    }
+    scoreRef.current?.focus();
   }, [players]);
+
+  useEffect(() => {
+    if (isNewPlayerModalOpen && newPlayerNameRef.current) {
+      newPlayerNameRef.current?.focus();
+    }
+  }, [isNewPlayerModalOpen]);
 
   const addPlayer = () => {
     setIsNewPlayerModalOpen(true);
@@ -27,8 +37,10 @@ function App() {
   }
 
   const handleScore = (e) => {
-    const score = Number(e.target.value);
-    setCurrentScore(score)
+    const val = e.target.value;
+    if (val === "" || Number(val) >= 0){
+      setCurrentScore(val);
+    }
   }
 
   const addScore = () => {
@@ -36,7 +48,7 @@ function App() {
       if (prev.length > 1) {
         return prev.map((p, i) => {
           if (p.turn) {
-            return { ...p, score: p.score + currentScore, turn: false };
+            return { ...p, score: p.score + Number(currentScore), turn: false };
           } else if (i === (prev.findIndex(p => p.turn) + 1) % prev.length) {
             return { ...p, turn: true };
           } else {
@@ -45,7 +57,7 @@ function App() {
         })
       }
       return prev.map((p) => {
-        return { ...p, score: p.score + currentScore, turn: true };
+        return { ...p, score: p.score + Number(currentScore), turn: true };
       })
     })
     setCurrentScore(0);
@@ -108,14 +120,14 @@ function App() {
       {players.length > 0 && (
         <div className="flex flex-col items-center mt-4 mb-10 lg:mb-1">
           <label htmlFor="input-score" className="flex items-center mb-2">Enter score for: <span className="underline">{currentPlayerName}</span></label>
-          <input type="number" name="input-score" min="0" value={currentScore} className="border-1 rounded-xl px-2 mb-2 focus:border-sky-500" onChange={handleScore} />
+          <input type="number" name="input-score" min="0" ref={scoreRef} value={currentScore} className="border-1 rounded-xl px-2 mb-2 focus:border-sky-500" onChange={handleScore} />
           <button className="border-1 rounded-xl px-2 cursor-pointer" onClick={addScore}>Add Score</button>
         </div>
       )}
 
       <Modal isOpen={isNewPlayerModalOpen} onClose={() => setIsNewPlayerModalOpen(false)}>
         <h2 className="text-xl mb-2 font-bold">{players.length < 6 ?  'Add new player' : 'Cannot add more players'}</h2>
-        <input type="text" name="input-score" value={newPlayerName} className="border-1 rounded-xl px-2 mb-2 focus:border-sky-500" onChange={handleNewPlayer} />
+        <input type="text" name="input-score" ref={newPlayerNameRef} value={newPlayerName} className="border-1 rounded-xl px-2 mb-2 focus:border-sky-500" onChange={handleNewPlayer} />
         <button className="border-1 rounded-xl px-2 cursor-pointer disabled:bg-gray-400" onClick={addNewPlayer} disabled={players.length >= 6}>Add Player</button>
       </Modal>
 
